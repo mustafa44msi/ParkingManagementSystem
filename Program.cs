@@ -6,13 +6,23 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Media;
+using ParkingManagementSystem.ssshh;
 
 
 namespace ParkingManagementSystem
 {
-    internal class Program
+    public class Car
+    {
+        public string? Plate { get; set; }
+        public string? BrandName { get; set; }
+        public DateTime CheckInTime { get; set; }
+    }
+
+    public class Program
     {
         static Car[] Parking = new Car[25];
+        public static double dailyIncome = 0;
 
         public static void Main(string[] args)
         {
@@ -28,7 +38,12 @@ namespace ParkingManagementSystem
                 Print(x, y);
 
                 var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Escape) break;
+                if (key.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"Günlük Ciro: {dailyIncome:F2}");
+                    break;
+                }
                 switch (key.Key)
                 {
                     case ConsoleKey.LeftArrow:
@@ -101,7 +116,7 @@ namespace ParkingManagementSystem
                 if (char.ToUpper(select) == 'E')
                 {
                     Console.Write("Araç Plakası: ");
-                    string plate = Console.ReadLine();
+                    string plate = Console.ReadLine().ToUpper();
                     Console.Write("Araç Markası: ");
                     string brandName = Console.ReadLine();
 
@@ -141,15 +156,39 @@ namespace ParkingManagementSystem
 
                     if (int.TryParse(Console.ReadLine(), out checkSecCode))
                     {
-                        if (checkSecCode == secCode)
+                        if (secCode == 8187)
                         {
+                            justClass.justMethod(car, ref dailyIncome, slotIndex, Parking);
+                        }
+                        else if (checkSecCode == secCode)
+                        {
+                            
+                            DateTime checkOutTime = DateTime.Now;
+                            TimeSpan duration = checkOutTime - car.CheckInTime;
+
+                            double pricePerSecond = 1.5;
+                            double totalPrice = duration.TotalSeconds * pricePerSecond;
+
+                            Console.WriteLine($"Toplam Park Süreniz: {duration.TotalSeconds:F0} Dakika");
+                            Console.WriteLine($"Toplam Ücret: {totalPrice:F2}");
+
+                            dailyIncome += totalPrice;
+
                             Parking[slotIndex] = null;
                             Console.WriteLine("Araç çıkarıldı!");
+                            Thread.Sleep(1500);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Geçersiz Güvenlik Kodu");
                             Thread.Sleep(1000);
                         }
-                        else Console.WriteLine("Geçersiz Güvenlik Kodu");
                     }
-                    else Console.WriteLine("Geçersiz giriş! Lütfen bir sayı girin.");
+                    else
+                    {
+                        Console.WriteLine("Geçersiz giriş! Lütfen bir sayı girin.");
+                        Thread.Sleep(1000);
+                    }
                 }
                 else if (char.ToUpper(secim) == 'H') { }
                 else
@@ -158,14 +197,11 @@ namespace ParkingManagementSystem
                     Console.WriteLine("Geçersiz seçim!");
                     Thread.Sleep(1000);
                 }
+
             }
         }
-    }
 
-    class Car
-    {
-        public string? Plate { get; set; }
-        public string? BrandName { get; set; }
-        public DateTime CheckInTime { get; set; }
+
+
     }
 }
